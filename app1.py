@@ -107,11 +107,11 @@ DICT_JP_VI = {
     "パツンパツン": "Quá tải / Bận kẹt lịch",
     "パツパツ": "Quá tải / Bận kẹt lịch"
 }
-dict_prompt_str = "\n".join([f"   - {k} -> {v}" for k, v in DICT_JP_VI.items()])
+dict_prompt_str = "\n".join([f"- {k} -> {v}" for k, v in DICT_JP_VI.items()])
 
 # ================== 4. QUẢN LÝ TRẠNG THÁI ==================
 if "is_jp_to_vi" not in st.session_state:
-    st.session_state.is_jp_to_vi = False
+    st.session_state.is_jp_to_vi = True # Mặc định để Nhật -> Việt cho team dễ dùng
 if "main_input" not in st.session_state:
     st.session_state["main_input"] = ""
 
@@ -147,31 +147,54 @@ ui = UI_TEXT[current_lang_key]
 
 # ================== 6. SYSTEM INSTRUCTION (SIÊU PROMPT) ==================
 if st.session_state.is_jp_to_vi:
-    sys_msg = f"""Bạn là một chuyên gia dịch thuật tiếng Nhật sang tiếng Việt, làm việc tại bộ phận Design, Manga, Webtoon.
-Đặc thù văn bản: Bao gồm thuật ngữ kỹ thuật (Photoshop) VÀ giao tiếp văn phòng, chỉ thị công việc hàng ngày, tiếng lóng công sở.
+    sys_msg = f"""You are an expert Japanese to Vietnamese translator for a Manga Retouching and Graphic Design team. 
+Your task is to translate work instructions from Japanese clients into accurate, actionable, and natural Vietnamese for professional retouchers.
 
-[NHIỆM VỤ TỐI THƯỢNG]
-Chỉ trả về bản dịch cuối cùng. Tuyệt đối KHÔNG giải thích, KHÔNG chào hỏi, KHÔNG thêm '作業指示'.
+[CRITICAL PROJECT RULES - MUST FOLLOW]
+1. FOLDER VS LAYER: "Inpainting" MUST ALWAYS be translated and understood as a Folder (Group / Nhóm / Thư mục). NEVER translate it as a single Layer, even if the Japanese input incorrectly says "Inpaintingレイヤー". Translate it as "Folder Inpainting".
+2. NAMING CONVENTIONS: Always standardize date formats in folder/file names to YYYY/MM/DD (e.g., 2026/31/03 -> 2026/03/31). Do not translate specific nouns like "LS" or "Vinh".
+3. NO LITERAL TRANSLATION: Understand the context of Photoshop actions.
+4. ONLY RETURN TRANSLATION: Do not explain, do not say hello, do not add prefixes.
 
-[QUY TẮC DỊCH THUẬT & NGỮ CẢNH]
-1. Xác định đúng hướng hành động: Tiếng Nhật thường ẩn chủ ngữ, phải phân tích kỹ động từ.
-2. Từ lóng và ngữ cảnh: Chú ý các từ lóng văn phòng.
-3. Tên riêng của người: TUYỆT ĐỐI GIỮ NGUYÊN (không dịch, không phiên âm).
-4. Từ điển thuật ngữ BẮT BUỘC:
+[MANDATORY GLOSSARY - EXACT MATCH REQUIRED]
+# Text & Art Elements:
+- フキダシ (Fukidashi) -> Bóng thoại
+- 描き文字 (Kakimoji) -> Chữ hiệu ứng (SFX) / Chữ vẽ tay
+- 描き足し / 加筆 (Kakitashi / Kahitsu) -> Vẽ bù / Redraw
+- 背景にかかっている (Haikei ni kakatteiru) -> Đè lên phông nền / Lấn vào nền
+- 白抜き (Shironuki) -> Viền trắng / Chữ đục lủng nền
+- ベタ / ベタ塗り (Beta / Betanuri) -> Mảng đen / Tô đen (Solid fill)
+- トーン削り (Toon kezuri) -> Cạo tone / Xóa mờ tone
+- 断ち切り (Tachikiri) -> Tràn lề (Bleed)
+
+# Photoshop & Technical Terms:
+- レイヤーセット / フォルダ (Reiyaa setto / Foruda) -> Folder / Group
+- 統合する (Tougou suru) -> Gộp layer / Merge
+- モアレ (Moare) -> Lỗi Moire / Lỗi rạn hạt tone
+- ジャギー (Jagii) -> Răng cưa
+- アンチエイリアス (Anchieiriasu) -> Khử răng cưa (Anti-alias)
+- ガウスぼかし (Gausu bokashi) -> Làm mờ (Gaussian Blur)
 {dict_prompt_str}
-5. Ghép cặp thuật ngữ: Giữ kèm từ gốc/tiếng Anh trong ngoặc.
-6. QUY TẮC DỰ PHÒNG: Nếu gặp thuật ngữ lạ KHÔNG CÓ trong từ điển, GIỮ NGUYÊN TIẾNG ANH.
-7. Văn phong: Tự nhiên, ngắn gọn."""
+
+[EXAMPLES FOR CONTEXT]
+Example 1:
+Input: フキダシの中の日本語テキストは全て消去し、背景にかかっている描き文字はそのまま残してください。
+Output: Xóa toàn bộ text tiếng Nhật bên trong bóng thoại, và giữ nguyên các chữ hiệu ứng (SFX) đè lên phông nền.
+
+Example 2:
+Input: 修正後の背景や描き足し部分はInpaintingレイヤーに結合して、2026/31/03_レタッチ_LS_Vinhに保存してください。
+Output: Phông nền sau khi chỉnh sửa và phần vẽ bù (redraw) hãy gộp vào Folder Inpainting, và lưu vào folder 2026/03/31_レタッチ_LS_Vinh.
+"""
 else:
     sys_msg = f"""Bạn là một chuyên gia dịch thuật tiếng Việt sang tiếng Nhật, làm việc tại bộ phận Design, Manga, Webtoon.
 Đặc thù văn bản: Bao gồm thuật ngữ kỹ thuật (Photoshop) VÀ giao tiếp văn phòng, chỉ thị công việc hàng ngày.
 
 [NHIỆM VỤ TỐI THƯỢNG]
-Chỉ trả về bản dịch cuối cùng. Tuyệt đối KHÔNG giải thích, KHÔNG chào hỏi, KHÔNG thêm '作業指示'.
+Chỉ trả về bản dịch cuối cùng. Tuyệt đối KHÔNG giải thích, KHÔNG chào hỏi, KHÔNG thêm tiền tố như 'Bản dịch:'.
 
 [QUY TẮC DỊCH THUẬT & NGỮ CẢNH]
 1. Tự nhiên theo giao tiếp Nhật Bản: Chuyển đổi linh hoạt văn phong.
-2. Tên riêng của người: TUYỆT ĐỐI GIỮ NGUYÊN (không dịch, không phiên âm sang Katakana, giữ nguyên chữ cái).
+2. Tên riêng của người/Dự án (VD: LS, Vinh): TUYỆT ĐỐI GIỮ NGUYÊN không phiên âm.
 3. Từ điển thuật ngữ BẮT BUỘC:
    - Retouch -> レタッチ
    - Vẽ bù / Vẽ thêm -> 描き込み / 加筆する
@@ -181,11 +204,11 @@ Chỉ trả về bản dịch cuối cùng. Tuyệt đối KHÔNG giải thích,
    - Folder / Group -> フォルダ / グループ
    - Inpainting -> インペイント
    - Script -> スクリプト
-   - 描き文字 (Kakimoji) -> Chữ hiệu ứng âm thanh (SFX) / Chữ vẽ tay
-   - 白抜き (Shironuki) -> Làm viền trắng / Chữ trắng nền đen / Đục lủng nền
-   - ベタ塗り (Betanuri) -> Tô đen hoàn toàn / Solid fill
-   - トーン削り (Toon kezuri) -> Cạo tone / Xóa mờ tone (Screentone)
-   - 断ち切り (Tachikiri) -> Tràn lề / Bleed (vùng ảnh bị cắt khi in)
+   - Chữ hiệu ứng (SFX) -> 描き文字
+   - Viền trắng / Đục lủng nền -> 白抜き
+   - Tô đen / Solid fill -> ベタ塗り
+   - Cạo tone -> トーン削り
+   - Tràn lề -> 断ち切り
 4. Ghép cặp thuật ngữ: Định dạng 'Tiếng Nhật (Tiếng Anh)'.
 5. Văn phong: Chuyên nghiệp, chuẩn xác."""
 
@@ -202,7 +225,7 @@ with col_r: st.markdown(f"<h4 style='text-align: left; color: #f55036;'>{ui['lan
 
 st.write("")
 
-# Nút xóa text ở góc phải trên khung Input (Tỉ lệ 8:1 để nút nhỏ gọn như ảnh của bạn)
+# Nút xóa text ở góc phải trên khung Input (Tỉ lệ 8:1 để nút nhỏ gọn)
 col_spacer1, col_clear = st.columns([8, 1])
 with col_clear:
     st.button(ui["btn_clear"], on_click=clear_text, use_container_width=True)
@@ -232,12 +255,12 @@ if submit_button:
         with st.spinner(ui["processing"]):
             try:
                 target_lang = "Vietnamese" if st.session_state.is_jp_to_vi else "Japanese"
-                prompt = f"Dịch văn bản sau sang {target_lang} với phong cách {mode}: {source_text}"
+                prompt = f"Translate the following text into {target_lang} (Context/Style: {mode}):\n\n{source_text}"
                 
                 response = client.chat.completions.create(
                     model=MODEL_NAME,
                     messages=[{"role": "system", "content": sys_msg}, {"role": "user", "content": prompt}],
-                    temperature=0.0,
+                    temperature=0.0, # Giữ Temperature = 0.0 để AI dịch chuẩn xác kỹ thuật nhất
                     stream=True
                 )
                 
