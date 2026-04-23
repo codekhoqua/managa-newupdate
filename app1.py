@@ -1,7 +1,6 @@
-import json
 import streamlit as st
 from openai import OpenAI
-import streamlit.components.v1 as components
+from st_copy_to_clipboard import st_copy_to_clipboard
 
 # ================== 1. CẤU HÌNH TRANG & GIAO DIỆN ==================
 st.set_page_config(page_title="LSA Translator | Groq", page_icon="⚡", layout="centered")
@@ -26,7 +25,7 @@ st.markdown("""
     }
     div[data-testid="stFormSubmitButton"] > button:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(245, 80, 54, 0.5) !important; }
     
-    /* Style nút Xóa Text (Nút Copy cũng sẽ làm y hệt thế này) */
+    /* Style nút Xóa Text */
     .btn-clear > button {
         background-color: transparent !important; color: #ff4b4b !important; 
         border: 1px solid #ff4b4b !important; border-radius: 8px !important;
@@ -38,56 +37,14 @@ st.markdown("""
         background: rgba(30, 30, 30, 0.6); backdrop-filter: blur(10px); color: #f0f0f0;
         padding: 24px; border-radius: 12px; border-left: 4px solid #f55036;
         border-top: 1px solid #333; border-right: 1px solid #333; border-bottom: 1px solid #333;
-        font-size: 16.5px; line-height: 1.8; white-space: pre-wrap; min-height: 120px; margin-top: 10px; margin-bottom: 15px;
+        font-size: 16.5px; line-height: 1.8; white-space: pre-wrap; min-height: 120px; margin-top: 15px; margin-bottom: 15px;
     }
-    .result-header { font-size: 18px; font-weight: bold; color: #f55036; display: flex; align-items: center; gap: 8px; margin-top: 10px;}
+    .result-header { font-size: 18px; font-weight: bold; color: #f55036; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
     
     footer {visibility: hidden;}
     .stTextArea textarea { font-size: 15.5px !important; border-radius: 8px; }
     </style>
 """, unsafe_allow_html=True)
-
-# Hàm tạo nút Copy Custom bằng HTML/JS (CSS giống hệt nút Xóa)
-def render_custom_copy_button(text_to_copy):
-    js_text = json.dumps(text_to_copy)
-    html_code = f"""
-    <style>
-        body {{ margin: 0; padding: 0; background-color: transparent; }}
-        .copy-btn {{
-            background-color: transparent; 
-            color: #ff4b4b; 
-            border: 1px solid #ff4b4b; 
-            border-radius: 8px;
-            padding: 8px 10px;
-            font-size: 15px;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            cursor: pointer;
-            width: 100%;
-            text-align: center;
-            transition: all 0.3s ease;
-            box-sizing: border-box;
-            display: inline-block;
-        }}
-        .copy-btn:hover {{
-            background-color: #ff4b4b;
-            color: white;
-        }}
-    </style>
-    <button class="copy-btn" id="copyBtn" onclick='copyToClipboard()'>📋 Copy Text</button>
-    
-    <script>
-    function copyToClipboard() {{
-        navigator.clipboard.writeText({js_text}).then(function() {{
-            var btn = document.getElementById('copyBtn');
-            btn.innerHTML = '✅ Đã copy!';
-            setTimeout(function() {{ btn.innerHTML = '📋 Copy Text'; }}, 2000);
-        }}).catch(function(err) {{
-            console.error('Lỗi copy: ', err);
-        }});
-    }}
-    </script>
-    """
-    components.html(html_code, height=45)
 
 # ================== 2. CẤU HÌNH API GROQ ==================
 API_KEY = st.secrets["API_KEY"]
@@ -121,22 +78,27 @@ def clear_text():
     st.session_state["main_input"] = ""
 
 # ================== 5. CẤU HÌNH NGÔN NGỮ UI ==================
+# Đã update đầy đủ các trường để dịch toàn bộ giao diện
 UI_TEXT = {
     "vi_to_jp": {
         "title": "LSA TRANSLATOR", "subtitle": "Powered by Groq Engine ⚡",
         "placeholder": "Nhập nội dung cần dịch vào đây... (Ctrl + Enter để dịch)",
         "button": "⚡ Dịch Tốc Độ Cao", "toast": "Đã dịch xong trong chớp mắt!",
         "label_context": "Ngữ cảnh:", "label_input": "Văn bản nguồn:", "result_title": "BẢN DỊCH TIẾNG NHẬT",
-        "warning": "Vui lòng nhập nội dung cần dịch.", "footer": "© 2026 LinkStoryAsia | Design Team Internal Tool Ver 4.5",
-        "lang_left": "Tiếng Việt 🇻🇳", "lang_right": "Tiếng Nhật 🇯🇵"
+        "warning": "Vui lòng nhập nội dung cần dịch.", "footer": "© 2026 LinkStoryAsia | Design Team Internal Tool Ver 4.6",
+        "lang_left": "Tiếng Việt 🇻🇳", "lang_right": "Tiếng Nhật 🇯🇵",
+        "btn_clear": "🗑️ Xóa Text", "contexts": ["Văn phòng", "Kính ngữ", "Thân mật"],
+        "processing": "Processing...", "btn_copy": "📋 Copy Text", "btn_copy_done": "✅ Đã copy!"
     },
     "jp_to_vi": {
         "title": "LSA TRANSLATOR", "subtitle": "Powered by Groq Engine ⚡",
         "placeholder": "翻訳する内容を入力してください... (Ctrl + Enter)",
         "button": "⚡ 超高速翻訳", "toast": "翻訳が完了しました！",
         "label_context": "文脈:", "label_input": "原文:", "result_title": "ベトナム語訳",
-        "warning": "内容を入力してください。", "footer": "© 2026 LinkStoryAsia | デザインチーム翻訳ツール Ver 4.5",
-        "lang_left": "日本語 🇯🇵", "lang_right": "ベトナム語 🇻🇳"
+        "warning": "内容を入力してください。", "footer": "© 2026 LinkStoryAsia | デザインチーム翻訳ツール Ver 4.6",
+        "lang_left": "日本語 🇯🇵", "lang_right": "ベトナム語 🇻🇳",
+        "btn_clear": "🗑️ テキスト消去", "contexts": ["ビジネス", "丁寧語", "カジュアル"],
+        "processing": "翻訳中...", "btn_copy": "📋 コピー", "btn_copy_done": "✅ コピー完了！"
     }
 }
 
@@ -193,11 +155,11 @@ with col_r: st.markdown(f"<h4 style='text-align: left; color: #f55036;'>{ui['lan
 
 st.write("")
 
-# Nút xóa text ở khung Input
+# Nút xóa text ở khung Input (Đã update đa ngôn ngữ)
 col_spacer1, col_clear = st.columns([5, 1])
 with col_clear:
     st.markdown('<div class="btn-clear">', unsafe_allow_html=True)
-    st.button("🗑️ Xóa Text", on_click=clear_text, use_container_width=True)
+    st.button(ui["btn_clear"], on_click=clear_text, use_container_width=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
 with st.form(key='translation_form', clear_on_submit=False):
@@ -205,8 +167,8 @@ with st.form(key='translation_form', clear_on_submit=False):
     
     col1, col2 = st.columns([2, 1]) 
     with col1:
-        contexts = ["Văn phòng", "Kính ngữ", "Thân mật"] if not st.session_state.is_jp_to_vi else ["ビジネス", "丁寧語", "カジュアル"]
-        mode = st.selectbox(ui["label_context"], contexts, label_visibility="collapsed")
+        # Danh sách Contexts đã được đồng bộ với UI_TEXT
+        mode = st.selectbox(ui["label_context"], ui["contexts"], label_visibility="collapsed")
     with col2:
         submit_button = st.form_submit_button(ui["button"], use_container_width=True)
 
@@ -223,7 +185,7 @@ if submit_button:
         result_placeholder = st.empty()
         full_response = ""
         
-        with st.spinner("Processing..."):
+        with st.spinner(ui["processing"]):
             try:
                 target_lang = "Vietnamese" if st.session_state.is_jp_to_vi else "Japanese"
                 prompt = f"Dịch văn bản sau sang {target_lang} với phong cách {mode}: {source_text}"
@@ -241,9 +203,13 @@ if submit_button:
                         full_response += content
                         result_placeholder.markdown(f'<div class="result-box">{full_response.replace(chr(10), "<br>")}</div>', unsafe_allow_html=True)
                 
-                # Gõ xong -> Chèn Nút Copy vào vị trí góc phải bên trên
+                # Gõ xong -> Chèn Nút Copy vào vị trí góc phải bên trên (Đã update đa ngôn ngữ)
                 with copy_placeholder:
-                    render_custom_copy_button(full_response)
+                    st_copy_to_clipboard(
+                        full_response, 
+                        before_copy_label=ui["btn_copy"], 
+                        after_copy_label=ui["btn_copy_done"]
+                    )
 
                 st.toast(ui["toast"], icon="✅")
             except Exception as e:
