@@ -40,7 +40,7 @@ st.markdown("""
     }
     .result-header { font-size: 18px; font-weight: bold; color: #f55036; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
     
-    /* TRANG ĐIỂM KHUNG COPY MẶC ĐỊNH */
+    /* TRANG ĐIỂM KHUNG COPY MẶC ĐỊNH (ÉP VỀ FONT CHỮ THƯỜNG) */
     [data-testid="stCodeBlock"] {
         background-color: rgba(30, 30, 30, 0.6) !important;
         backdrop-filter: blur(10px) !important;
@@ -57,7 +57,7 @@ st.markdown("""
         background-color: transparent !important;
     }
     [data-testid="stCodeBlock"] code {
-        font-family: inherit !important; /* Dùng font bình thường */
+        font-family: "Source Sans Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important; /* Ép font chuẩn */
         font-size: 16.5px !important;
         line-height: 1.8 !important;
         color: #f0f0f0 !important;
@@ -106,7 +106,7 @@ UI_TEXT = {
         "placeholder": "Nhập nội dung cần dịch vào đây... (Ctrl + Enter để dịch)",
         "button": "⚡ Dịch Tốc Độ Cao", "toast": "Đã dịch xong trong chớp mắt!",
         "label_context": "Ngữ cảnh:", "label_input": "Văn bản nguồn:", "result_title": "BẢN DỊCH TIẾNG NHẬT",
-        "warning": "Vui lòng nhập nội dung cần dịch.", "footer": "© 2026 LinkStoryAsia | Design Team Internal Tool Ver 3.5",
+        "warning": "Vui lòng nhập nội dung cần dịch.", "footer": "© 2026 LinkStoryAsia | Design Team Internal Tool Ver 3.6",
         "lang_left": "Tiếng Việt 🇻🇳", "lang_right": "Tiếng Nhật 🇯🇵"
     },
     "jp_to_vi": {
@@ -114,7 +114,7 @@ UI_TEXT = {
         "placeholder": "翻訳する内容を入力してください... (Ctrl + Enter)",
         "button": "⚡ 超高速翻訳", "toast": "翻訳が完了しました！",
         "label_context": "文脈:", "label_input": "原文:", "result_title": "ベトナム語訳",
-        "warning": "内容を入力してください。", "footer": "© 2026 LinkStoryAsia | デザインチーム翻訳ツール Ver 3.5",
+        "warning": "内容を入力してください。", "footer": "© 2026 LinkStoryAsia | デザインチーム翻訳ツール Ver 3.6",
         "lang_left": "日本語 🇯🇵", "lang_right": "ベトナム語 🇻🇳"
     }
 }
@@ -215,7 +215,7 @@ if submit_button:
                         full_response += content
                         result_placeholder.markdown(f'<div class="result-box">{full_response.replace(chr(10), "<br>")}</div>', unsafe_allow_html=True)
                 
-                # BƯỚC 2: Thêm wrap_lines=True để ép Streamlit tự động xuống dòng
+                # BƯỚC 2: Gõ xong, tráo thành khung st.code (Đã FIX CSS ép xuống dòng và đổi font chuẩn)
                 result_placeholder.code(full_response, language="text", wrap_lines=True)
 
                 st.toast(ui["toast"], icon="✅")
