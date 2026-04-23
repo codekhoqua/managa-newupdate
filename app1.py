@@ -34,13 +34,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ================== 2. CẤU HÌNH API GROQ ==================
-API_KEY = os.getenv("API_KEY")
-
-if not API_KEY:
-    st.error("Không tìm thấy API_KEY trong Secrets!")
-    st.stop()
-
-genai.configure(api_key=API_KEY)
+API_KEY = st.secrets["API_KEY"]
 client = OpenAI(api_key=API_KEY, base_url="https://api.groq.com/openai/v1")
 MODEL_NAME = "llama-3.3-70b-versatile" 
 
