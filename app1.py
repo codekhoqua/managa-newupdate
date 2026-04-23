@@ -1,6 +1,7 @@
+import json
 import streamlit as st
 from openai import OpenAI
-from st_copy_to_clipboard import st_copy_to_clipboard
+import streamlit.components.v1 as components
 
 # ================== 1. CẤU HÌNH TRANG & GIAO DIỆN ==================
 st.set_page_config(page_title="LSA Translator | Groq", page_icon="⚡", layout="centered")
@@ -17,34 +18,74 @@ st.markdown("""
     }
     .groq-subtitle { color: #888; font-size: 1.1rem; font-weight: 400; }
     
-    /* Style nút Submit */
+    /* Style nút Submit (Màu cam chớp) */
     div[data-testid="stFormSubmitButton"] > button {
         background: linear-gradient(90deg, #f55036, #e03a20) !important;
         color: white !important; border: none !important; border-radius: 8px !important;
         font-weight: bold !important; font-size: 16px !important; transition: all 0.3s ease !important;
     }
     div[data-testid="stFormSubmitButton"] > button:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(245, 80, 54, 0.5) !important; }
-    
-    /* Style nút Xóa Text */
-    .btn-clear > button {
-        background-color: transparent !important; color: #ff4b4b !important; 
-        border: 1px solid #ff4b4b !important; border-radius: 8px !important;
-    }
-    .btn-clear > button:hover { background-color: #ff4b4b !important; color: white !important; }
 
-    /* Khung hiển thị lúc đang stream */
+    /* Khung hiển thị text: ĐÃ GIẢM KHOẢNG CÁCH DÒNG VÀ PADDING */
     .result-box {
         background: rgba(30, 30, 30, 0.6); backdrop-filter: blur(10px); color: #f0f0f0;
-        padding: 24px; border-radius: 12px; border-left: 4px solid #f55036;
+        padding: 18px 20px; /* Giảm padding */
+        border-radius: 12px; border-left: 4px solid #f55036;
         border-top: 1px solid #333; border-right: 1px solid #333; border-bottom: 1px solid #333;
-        font-size: 16.5px; line-height: 1.8; white-space: pre-wrap; min-height: 120px; margin-top: 15px; margin-bottom: 15px;
+        font-size: 16px; 
+        line-height: 1.5; /* Giảm khoảng cách dòng từ 1.8 xuống 1.5 */
+        white-space: pre-wrap; min-height: 100px; margin-top: 10px; margin-bottom: 15px;
     }
-    .result-header { font-size: 18px; font-weight: bold; color: #f55036; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+    .result-header { font-size: 18px; font-weight: bold; color: #f55036; display: flex; align-items: center; gap: 8px; margin-top: 10px;}
     
     footer {visibility: hidden;}
     .stTextArea textarea { font-size: 15.5px !important; border-radius: 8px; }
     </style>
 """, unsafe_allow_html=True)
+
+# Hàm tạo nút Copy Custom bằng HTML/JS (Style chuẩn y hệt Dark Mode của Streamlit)
+def render_custom_copy_button(text_to_copy, label_icon="📋"):
+    js_text = json.dumps(text_to_copy)
+    html_code = f"""
+    <style>
+        body {{ margin: 0; padding: 0; background-color: transparent; }}
+        .st-copy-btn {{
+            background-color: #262730; /* Màu nền nút phụ của Streamlit */
+            border: 1px solid rgba(250, 250, 250, 0.2); /* Viền xám nhạt */
+            color: white;
+            border-radius: 8px;
+            padding: 0;
+            font-size: 16px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            cursor: pointer;
+            width: 100%;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: border-color 0.2s, color 0.2s;
+            box-sizing: border-box;
+        }}
+        .st-copy-btn:hover {{
+            border-color: #f55036;
+            color: #f55036;
+        }}
+    </style>
+    <button class="st-copy-btn" id="copyBtn" onclick='copyToClipboard()'>{label_icon}</button>
+    
+    <script>
+    function copyToClipboard() {{
+        navigator.clipboard.writeText({js_text}).then(function() {{
+            var btn = document.getElementById('copyBtn');
+            btn.innerHTML = '✅';
+            setTimeout(function() {{ btn.innerHTML = '{label_icon}'; }}, 2000);
+        }}).catch(function(err) {{
+            console.error('Lỗi copy: ', err);
+        }});
+    }}
+    </script>
+    """
+    components.html(html_code, height=45)
 
 # ================== 2. CẤU HÌNH API GROQ ==================
 API_KEY = st.secrets["API_KEY"]
@@ -78,27 +119,26 @@ def clear_text():
     st.session_state["main_input"] = ""
 
 # ================== 5. CẤU HÌNH NGÔN NGỮ UI ==================
-# Đã update đầy đủ các trường để dịch toàn bộ giao diện
 UI_TEXT = {
     "vi_to_jp": {
         "title": "LSA TRANSLATOR", "subtitle": "Powered by Groq Engine ⚡",
         "placeholder": "Nhập nội dung cần dịch vào đây... (Ctrl + Enter để dịch)",
         "button": "⚡ Dịch Tốc Độ Cao", "toast": "Đã dịch xong trong chớp mắt!",
         "label_context": "Ngữ cảnh:", "label_input": "Văn bản nguồn:", "result_title": "BẢN DỊCH TIẾNG NHẬT",
-        "warning": "Vui lòng nhập nội dung cần dịch.", "footer": "© 2026 LinkStoryAsia | Design Team Internal Tool Ver 4.6",
+        "warning": "Vui lòng nhập nội dung cần dịch.", "footer": "© 2026 LinkStoryAsia | Design Team Internal Tool Ver 5.0",
         "lang_left": "Tiếng Việt 🇻🇳", "lang_right": "Tiếng Nhật 🇯🇵",
         "btn_clear": "🗑️", "contexts": ["Văn phòng", "Kính ngữ", "Thân mật"],
-        "processing": "Processing...", "btn_copy": "📋", "btn_copy_done": "✅"
+        "processing": "Processing...", "btn_copy": "📋"
     },
     "jp_to_vi": {
         "title": "LSA TRANSLATOR", "subtitle": "Powered by Groq Engine ⚡",
         "placeholder": "翻訳する内容を入力してください... (Ctrl + Enter)",
         "button": "⚡ 超高速翻訳", "toast": "翻訳が完了しました！",
         "label_context": "文脈:", "label_input": "原文:", "result_title": "ベトナム語訳",
-        "warning": "内容を入力してください。", "footer": "© 2026 LinkStoryAsia | デザインチーム翻訳ツール Ver 4.6",
+        "warning": "内容を入力してください。", "footer": "© 2026 LinkStoryAsia | デザインチーム翻訳ツール Ver 5.0",
         "lang_left": "日本語 🇯🇵", "lang_right": "ベトナム語 🇻🇳",
         "btn_clear": "🗑️", "contexts": ["ビジネス", "丁寧語", "カジュアル"],
-        "processing": "翻訳中...", "btn_copy": "📋", "btn_copy_done": "✅"
+        "processing": "翻訳中...", "btn_copy": "📋"
     }
 }
 
@@ -155,19 +195,16 @@ with col_r: st.markdown(f"<h4 style='text-align: left; color: #f55036;'>{ui['lan
 
 st.write("")
 
-# Nút xóa text ở khung Input (Đã update đa ngôn ngữ)
-col_spacer1, col_clear = st.columns([5, 1])
+# Nút xóa text ở góc phải trên khung Input (Tỉ lệ 8:1 để nút nhỏ gọn như ảnh của bạn)
+col_spacer1, col_clear = st.columns([8, 1])
 with col_clear:
-    st.markdown('<div class="btn-clear">', unsafe_allow_html=True)
     st.button(ui["btn_clear"], on_click=clear_text, use_container_width=True)
-    st.markdown('</div>', unsafe_allow_html=True)
 
 with st.form(key='translation_form', clear_on_submit=False):
     source_text = st.text_area(ui["label_input"], height=160, placeholder=ui["placeholder"], key="main_input", label_visibility="collapsed")
     
     col1, col2 = st.columns([2, 1]) 
     with col1:
-        # Danh sách Contexts đã được đồng bộ với UI_TEXT
         mode = st.selectbox(ui["label_context"], ui["contexts"], label_visibility="collapsed")
     with col2:
         submit_button = st.form_submit_button(ui["button"], use_container_width=True)
@@ -175,8 +212,8 @@ with st.form(key='translation_form', clear_on_submit=False):
 # ================== 8. XỬ LÝ DỊCH VÀ HIỂN THỊ ==================
 if submit_button:
     if source_text.strip():
-        # Tạo Layout 2 cột: Tiêu đề kết quả (trái) và Nút Copy (phải)
-        col_res_title, col_res_copy = st.columns([5, 1])
+        # Tạo Layout 2 cột: Tiêu đề kết quả (trái) và Nút Copy (phải) tỉ lệ 8:1
+        col_res_title, col_res_copy = st.columns([8, 1])
         with col_res_title:
             st.markdown(f'<div class="result-header"><span style="font-size: 22px;">⚡</span> {ui["result_title"]}</div>', unsafe_allow_html=True)
         with col_res_copy:
@@ -203,13 +240,9 @@ if submit_button:
                         full_response += content
                         result_placeholder.markdown(f'<div class="result-box">{full_response.replace(chr(10), "<br>")}</div>', unsafe_allow_html=True)
                 
-                # Gõ xong -> Chèn Nút Copy vào vị trí góc phải bên trên (Đã update đa ngôn ngữ)
+                # Gõ xong -> Chèn Nút Copy vào vị trí góc phải bên trên
                 with copy_placeholder:
-                    st_copy_to_clipboard(
-                        full_response, 
-                        before_copy_label=ui["btn_copy"], 
-                        after_copy_label=ui["btn_copy_done"]
-                    )
+                    render_custom_copy_button(full_response, label_icon=ui["btn_copy"])
 
                 st.toast(ui["toast"], icon="✅")
             except Exception as e:
