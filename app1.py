@@ -155,12 +155,13 @@ Chỉ trả về bản dịch cuối cùng. Tuyệt đối KHÔNG giải thích,
 
 [QUY TẮC DỊCH THUẬT & NGỮ CẢNH]
 1. Xác định đúng hướng hành động: Tiếng Nhật thường ẩn chủ ngữ, phải phân tích kỹ động từ.
-2. Từ lóng và ngữ cảnh: Chú ý các từ lóng văn phòng. Chú ý dịch chính xác tên riêng.
-3. Từ điển thuật ngữ BẮT BUỘC:
+2. Từ lóng và ngữ cảnh: Chú ý các từ lóng văn phòng.
+3. Tên riêng của người: TUYỆT ĐỐI GIỮ NGUYÊN (không dịch, không phiên âm).
+4. Từ điển thuật ngữ BẮT BUỘC:
 {dict_prompt_str}
-4. Ghép cặp thuật ngữ: Giữ kèm từ gốc/tiếng Anh trong ngoặc.
-5. QUY TẮC DỰ PHÒNG: Nếu gặp thuật ngữ lạ KHÔNG CÓ trong từ điển, GIỮ NGUYÊN TIẾNG ANH.
-6. Văn phong: Tự nhiên, ngắn gọn."""
+5. Ghép cặp thuật ngữ: Giữ kèm từ gốc/tiếng Anh trong ngoặc.
+6. QUY TẮC DỰ PHÒNG: Nếu gặp thuật ngữ lạ KHÔNG CÓ trong từ điển, GIỮ NGUYÊN TIẾNG ANH.
+7. Văn phong: Tự nhiên, ngắn gọn."""
 else:
     sys_msg = f"""Bạn là một chuyên gia dịch thuật tiếng Việt sang tiếng Nhật, làm việc tại bộ phận Design, Manga, Webtoon.
 Đặc thù văn bản: Bao gồm thuật ngữ kỹ thuật (Photoshop) VÀ giao tiếp văn phòng, chỉ thị công việc hàng ngày.
@@ -170,7 +171,8 @@ Chỉ trả về bản dịch cuối cùng. Tuyệt đối KHÔNG giải thích,
 
 [QUY TẮC DỊCH THUẬT & NGỮ CẢNH]
 1. Tự nhiên theo giao tiếp Nhật Bản: Chuyển đổi linh hoạt văn phong.
-2. Từ điển thuật ngữ BẮT BUỘC:
+2. Tên riêng của người: TUYỆT ĐỐI GIỮ NGUYÊN (không dịch, không phiên âm sang Katakana, giữ nguyên chữ cái).
+3. Từ điển thuật ngữ BẮT BUỘC:
    - Retouch -> レタッチ
    - Vẽ bù / Vẽ thêm -> 描き込み / 加筆する
    - Lettering -> 写植
@@ -179,8 +181,8 @@ Chỉ trả về bản dịch cuối cùng. Tuyệt đối KHÔNG giải thích,
    - Folder / Group -> フォルダ / グループ
    - Inpainting -> インペイント
    - Script -> スクリプト
-3. Ghép cặp thuật ngữ: Định dạng 'Tiếng Nhật (Tiếng Anh)'.
-4. Văn phong: Chuyên nghiệp, chuẩn xác."""
+4. Ghép cặp thuật ngữ: Định dạng 'Tiếng Nhật (Tiếng Anh)'.
+5. Văn phong: Chuyên nghiệp, chuẩn xác."""
 
 # ================== 7. HIỂN THỊ GIAO DIỆN CHÍNH ==================
 st.markdown(f'<div class="groq-title-container"><div class="groq-title">{ui["title"]}</div><div class="groq-subtitle">{ui["subtitle"]}</div></div>', unsafe_allow_html=True)
