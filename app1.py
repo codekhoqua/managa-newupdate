@@ -6,7 +6,10 @@ import streamlit.components.v1 as components
 # ================== 1. CẤU HÌNH TRANG & GIAO DIỆN ==================
 st.set_page_config(page_title="LSA Translator | Groq", page_icon="⚡", layout="centered")
 
+# --- THÊM FONT AWESOME VÀO STYLE ---
 st.markdown("""
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
     <style>
     .block-container { padding-top: 2rem; padding-bottom: 2rem; }
     .groq-title-container { text-align: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid #333; }
@@ -43,20 +46,30 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Hàm tạo nút Copy Custom bằng HTML/JS (Style chuẩn y hệt Dark Mode của Streamlit)
-def render_custom_copy_button(text_to_copy, label_icon="📋"):
+# ================== CẬP NHẬT HÀM RENDER NÚT COPY ==================
+def render_custom_copy_button(text_to_copy):
+    """
+    Hàm tạo nút Copy Custom bằng HTML/JS, sử dụng icon Font Awesome.
+    Đã loại bỏ tham số 'label_icon' cũ vì icon được fix cứng trong code HTML.
+    """
     js_text = json.dumps(text_to_copy)
+    
+    # Định nghĩa class của icon mặc định và icon khi copy thành công
+    default_icon_html = '<i class="fa-solid fa-copy"></i>'
+    success_icon_html = '<i class="fa-solid fa-check"></i>' # Dùng icon tick của Font Awesome cho đồng bộ
+    
     html_code = f"""
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
     <style>
-        body {{ margin: 0; padding: 0; background-color: transparent; }}
+        body {{ margin: 0; padding: 0; background-color: transparent; overflow: hidden;}}
         .st-copy-btn {{
             background-color: #262730; /* Màu nền nút phụ của Streamlit */
             border: 1px solid rgba(250, 250, 250, 0.2); /* Viền xám nhạt */
             color: white;
             border-radius: 8px;
             padding: 0;
-            font-size: 16px;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-size: 18px; /* Tăng nhẹ size để icon rõ hơn */
             cursor: pointer;
             width: 100%;
             height: 40px;
@@ -70,17 +83,31 @@ def render_custom_copy_button(text_to_copy, label_icon="📋"):
             border-color: #f55036;
             color: #f55036;
         }}
+        /* Style riêng cho icon check thành công */
+        .st-copy-btn.success {{
+            color: #00cc00; /* Màu xanh lá cho dấu tick */
+            border-color: #00cc00;
+        }}
     </style>
-    <button class="st-copy-btn" id="copyBtn" onclick='copyToClipboard()'>{label_icon}</button>
+    
+    <button class="st-copy-btn" id="copyBtn" onclick='copyToClipboard()'>{default_icon_html}</button>
     
     <script>
     function copyToClipboard() {{
         navigator.clipboard.writeText({js_text}).then(function() {{
             var btn = document.getElementById('copyBtn');
-            btn.innerHTML = '✅';
-            setTimeout(function() {{ btn.innerHTML = '{label_icon}'; }}, 2000);
+            // Thay đổi icon và thêm class style thành công
+            btn.innerHTML = '{success_icon_html}';
+            btn.classList.add('success');
+            
+            // Reset lại sau 2 giây
+            setTimeout(function() {{ 
+                btn.innerHTML = '{default_icon_html}'; 
+                btn.classList.remove('success');
+            }}, 2000);
         }}).catch(function(err) {{
             console.error('Lỗi copy: ', err);
+            alert('Không thể copy vào clipboard. Vui lòng kiểm tra quyền truy cập.');
         }});
     }}
     </script>
@@ -128,7 +155,7 @@ UI_TEXT = {
         "warning": "Vui lòng nhập nội dung cần dịch.", "footer": "© 2026 LinkStoryAsia | Design Team Internal Tool Ver 5.0",
         "lang_left": "Tiếng Việt 🇻🇳", "lang_right": "Tiếng Nhật 🇯🇵",
         "btn_clear": "🗑️", "contexts": ["Văn phòng", "Kính ngữ", "Thân mật"],
-        "processing": "Processing...", "btn_copy": "📋"
+        "processing": "Processing..."
     },
     "jp_to_vi": {
         "title": "LSA TRANSLATOR", "subtitle": "Powered by Groq Engine ⚡",
@@ -138,14 +165,14 @@ UI_TEXT = {
         "warning": "内容を入力してください。", "footer": "© 2026 LinkStoryAsia | デザインチーム翻訳ツール Ver 5.0",
         "lang_left": "日本語 🇯🇵", "lang_right": "ベトナム語 🇻🇳",
         "btn_clear": "🗑️", "contexts": ["ビジネス", "丁寧語", "カジュアル"],
-        "processing": "翻訳中...", "btn_copy": "📋"
+        "processing": "翻訳中..."
     }
 }
 
 current_lang_key = "jp_to_vi" if st.session_state.is_jp_to_vi else "vi_to_jp"
 ui = UI_TEXT[current_lang_key]
 
-# ================== 6. SYSTEM INSTRUCTION (SIÊU PROMPT) ==================
+# (Phần 6. SYSTEM INSTRUCTION GIỮ NGUYÊN NHƯ CŨ)
 if st.session_state.is_jp_to_vi:
     sys_msg = f"""You are an expert Japanese to Vietnamese translator for a Manga Retouching and Graphic Design team. 
 Your task is to translate work instructions from Japanese clients into accurate, actionable, and natural Vietnamese for professional retouchers.
@@ -225,7 +252,6 @@ with col_r: st.markdown(f"<h4 style='text-align: left; color: #f55036;'>{ui['lan
 
 st.write("")
 
-# Nút xóa text ở góc phải trên khung Input (Tỉ lệ 8:1 để nút nhỏ gọn)
 col_spacer1, col_clear = st.columns([8, 1])
 with col_clear:
     st.button(ui["btn_clear"], on_click=clear_text, use_container_width=True)
@@ -242,12 +268,11 @@ with st.form(key='translation_form', clear_on_submit=False):
 # ================== 8. XỬ LÝ DỊCH VÀ HIỂN THỊ ==================
 if submit_button:
     if source_text.strip():
-        # Tạo Layout 2 cột: Tiêu đề kết quả (trái) và Nút Copy (phải) tỉ lệ 8:1
         col_res_title, col_res_copy = st.columns([8, 1])
         with col_res_title:
             st.markdown(f'<div class="result-header"><span style="font-size: 22px;">⚡</span> {ui["result_title"]}</div>', unsafe_allow_html=True)
         with col_res_copy:
-            copy_placeholder = st.empty() # Giữ chỗ chờ AI gõ xong mới hiện nút Copy
+            copy_placeholder = st.empty()
             
         result_placeholder = st.empty()
         full_response = ""
@@ -260,7 +285,7 @@ if submit_button:
                 response = client.chat.completions.create(
                     model=MODEL_NAME,
                     messages=[{"role": "system", "content": sys_msg}, {"role": "user", "content": prompt}],
-                    temperature=0.0, # Giữ Temperature = 0.0 để AI dịch chuẩn xác kỹ thuật nhất
+                    temperature=0.0,
                     stream=True
                 )
                 
@@ -270,9 +295,10 @@ if submit_button:
                         full_response += content
                         result_placeholder.markdown(f'<div class="result-box">{full_response.replace(chr(10), "<br>")}</div>', unsafe_allow_html=True)
                 
-                # Gõ xong -> Chèn Nút Copy vào vị trí góc phải bên trên
+                # ================== CẬP NHẬT CÁCH GỌI HÀM COPY ==================
+                # Loại bỏ tham số label_icon cũ vì icon đã được fix cứng trong hàm render
                 with copy_placeholder:
-                    render_custom_copy_button(full_response, label_icon=ui["btn_copy"])
+                    render_custom_copy_button(full_response)
 
                 st.toast(ui["toast"], icon="✅")
             except Exception as e:
