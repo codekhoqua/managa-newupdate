@@ -31,6 +31,7 @@ st.markdown("""
     }
     .btn-clear > button:hover { background-color: #ff4b4b !important; color: white !important; }
 
+    /* Khung hiển thị lúc đang stream */
     .result-box {
         background: rgba(30, 30, 30, 0.6); backdrop-filter: blur(10px); color: #f0f0f0;
         padding: 24px; border-radius: 12px; border-left: 4px solid #f55036;
@@ -38,6 +39,31 @@ st.markdown("""
         font-size: 16.5px; line-height: 1.8; white-space: pre-wrap; min-height: 120px; margin-top: 15px; margin-bottom: 15px;
     }
     .result-header { font-size: 18px; font-weight: bold; color: #f55036; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+    
+    /* TRANG ĐIỂM KHUNG COPY MẶC ĐỊNH CHO GIỐNG RESULT-BOX */
+    [data-testid="stCodeBlock"] {
+        background-color: rgba(30, 30, 30, 0.6) !important;
+        backdrop-filter: blur(10px) !important;
+        border-radius: 12px !important;
+        border-left: 4px solid #f55036 !important;
+        border-top: 1px solid #333 !important;
+        border-right: 1px solid #333 !important;
+        border-bottom: 1px solid #333 !important;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+        padding: 10px !important;
+        margin-top: 15px;
+    }
+    [data-testid="stCodeBlock"] pre {
+        background-color: transparent !important;
+    }
+    [data-testid="stCodeBlock"] code {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+        font-size: 16.5px !important;
+        line-height: 1.8 !important;
+        color: #f0f0f0 !important;
+        white-space: pre-wrap !important;
+    }
+
     footer {visibility: hidden;}
     .stTextArea textarea { font-size: 15.5px !important; border-radius: 8px; }
     </style>
@@ -68,11 +94,9 @@ dict_prompt_str = "\n".join([f"   - {k} -> {v}" for k, v in DICT_JP_VI.items()])
 # ================== 4. QUẢN LÝ TRẠNG THÁI (SESSION STATE) ==================
 if "is_jp_to_vi" not in st.session_state:
     st.session_state.is_jp_to_vi = False
-# Biến lưu trữ nội dung ô nhập liệu
 if "main_input" not in st.session_state:
     st.session_state["main_input"] = ""
 
-# Hàm Callback Xóa Text
 def clear_text():
     st.session_state["main_input"] = ""
 
@@ -83,7 +107,7 @@ UI_TEXT = {
         "placeholder": "Nhập nội dung cần dịch vào đây... (Ctrl + Enter để dịch)",
         "button": "⚡ Dịch Tốc Độ Cao", "toast": "Đã dịch xong trong chớp mắt!",
         "label_context": "Ngữ cảnh:", "label_input": "Văn bản nguồn:", "result_title": "BẢN DỊCH TIẾNG NHẬT",
-        "warning": "Vui lòng nhập nội dung cần dịch.", "footer": "© 2026 LinkStoryAsia | Design Team Internal Tool Ver 3.2",
+        "warning": "Vui lòng nhập nội dung cần dịch.", "footer": "© 2026 LinkStoryAsia | Design Team Internal Tool Ver 3.3",
         "lang_left": "Tiếng Việt 🇻🇳", "lang_right": "Tiếng Nhật 🇯🇵"
     },
     "jp_to_vi": {
@@ -91,7 +115,7 @@ UI_TEXT = {
         "placeholder": "翻訳する内容を入力してください... (Ctrl + Enter)",
         "button": "⚡ 超高速翻訳", "toast": "翻訳が完了しました！",
         "label_context": "文脈:", "label_input": "原文:", "result_title": "ベトナム語訳",
-        "warning": "内容を入力してください。", "footer": "© 2026 LinkStoryAsia | デザインチーム翻訳ツール Ver 3.2",
+        "warning": "内容を入力してください。", "footer": "© 2026 LinkStoryAsia | デザインチーム翻訳ツール Ver 3.3",
         "lang_left": "日本語 🇯🇵", "lang_right": "ベトナム語 🇻🇳"
     }
 }
@@ -108,16 +132,13 @@ if st.session_state.is_jp_to_vi:
 Chỉ trả về bản dịch cuối cùng. Tuyệt đối KHÔNG giải thích, KHÔNG chào hỏi, KHÔNG thêm '作業指示'.
 
 [QUY TẮC DỊCH THUẬT & NGỮ CẢNH]
-1. Xác định đúng hướng hành động: Tiếng Nhật thường ẩn chủ ngữ, phải phân tích kỹ động từ (nhất là dạng nhờ vả như お願いする, もらう). 
-   - Ví dụ: "修正お願いすること可能でしょうか" phải dịch là "Tôi có thể nhờ bạn sửa giúp được không?", tuyệt đối KHÔNG dịch là "Tôi xin phép được sửa".
-2. Từ lóng và ngữ cảnh: Chú ý các từ lóng văn phòng (như bận rộn, quá tải). Chú ý dịch chính xác tên riêng (VD: 藤村 là Fujimura).
-3. Từ điển thuật ngữ BẮT BUỘC (phải dịch chính xác 100% theo danh sách này):
+1. Xác định đúng hướng hành động: Tiếng Nhật thường ẩn chủ ngữ, phải phân tích kỹ động từ.
+2. Từ lóng và ngữ cảnh: Chú ý các từ lóng văn phòng. Chú ý dịch chính xác tên riêng.
+3. Từ điển thuật ngữ BẮT BUỘC:
 {dict_prompt_str}
-4. Ghép cặp thuật ngữ: Khi dịch thuật ngữ chuyên ngành, giữ kèm từ gốc hoặc tiếng Anh trong ngoặc. Ví dụ: 'Inpainting (インペイント)'. Lưu ý Inpainting luôn là Folder/Layer Set, không phải layer thường.
-5. QUY TẮC DỰ PHÒNG (Fallback): 
-   - Nếu gặp thuật ngữ chuyên ngành Photoshop KHÔNG CÓ trong từ điển trên, HÃY GIỮ NGUYÊN TIẾNG ANH. Tuyệt đối KHÔNG cố dịch gượng ép sang tiếng Việt.
-   - Nếu văn bản gốc đã có sẵn từ tiếng Anh, hãy giữ nguyên.
-6. Văn phong: Tự nhiên, ngắn gọn, linh hoạt giữa ngôn ngữ kỹ thuật và giao tiếp lịch sự nơi công sở."""
+4. Ghép cặp thuật ngữ: Giữ kèm từ gốc/tiếng Anh trong ngoặc. Ví dụ: 'Inpainting (インペイント)'.
+5. QUY TẮC DỰ PHÒNG (Fallback): Nếu gặp thuật ngữ lạ KHÔNG CÓ trong từ điển, GIỮ NGUYÊN TIẾNG ANH.
+6. Văn phong: Tự nhiên, ngắn gọn."""
 
 else:
     sys_msg = f"""Bạn là một chuyên gia dịch thuật tiếng Việt sang tiếng Nhật, làm việc tại bộ phận Design, Manga, Webtoon.
@@ -127,8 +148,8 @@ else:
 Chỉ trả về bản dịch cuối cùng. Tuyệt đối KHÔNG giải thích, KHÔNG chào hỏi, KHÔNG thêm '作業指示'.
 
 [QUY TẮC DỊCH THUẬT & NGỮ CẢNH]
-1. Tự nhiên theo giao tiếp Nhật Bản: Chuyển đổi linh hoạt văn phong tiếng Việt sang các dạng kính ngữ/khiêm nhường ngữ phù hợp trong môi trường công sở Nhật Bản khi có yêu cầu/nhờ vả.
-2. Từ điển thuật ngữ BẮT BUỘC (Dịch ngược từ tiếng Việt sang tiếng Nhật):
+1. Tự nhiên theo giao tiếp Nhật Bản: Chuyển đổi linh hoạt văn phong.
+2. Từ điển thuật ngữ BẮT BUỘC:
    - Retouch -> レタッチ
    - Vẽ bù / Vẽ thêm -> 描き込み / 加筆する
    - Lettering -> 写植
@@ -137,13 +158,12 @@ Chỉ trả về bản dịch cuối cùng. Tuyệt đối KHÔNG giải thích,
    - Folder / Group -> フォルダ / グループ
    - Inpainting -> インペイント
    - Script -> スクリプト
-3. Ghép cặp thuật ngữ: Khi xuất bản dịch, ưu tiên định dạng 'Tiếng Nhật (Tiếng Anh)'. Ví dụ: 'インペイント (Inpainting)'.
-4. Văn phong: Chuyên nghiệp, chuẩn xác, tự nhiên như người bản xứ làm việc tại Nhật."""
+3. Ghép cặp thuật ngữ: Định dạng 'Tiếng Nhật (Tiếng Anh)'.
+4. Văn phong: Chuyên nghiệp, chuẩn xác."""
 
 # ================== 7. HIỂN THỊ GIAO DIỆN CHÍNH ==================
 st.markdown(f'<div class="groq-title-container"><div class="groq-title">{ui["title"]}</div><div class="groq-subtitle">{ui["subtitle"]}</div></div>', unsafe_allow_html=True)
 
-# Khối chuyển đổi ngôn ngữ
 col_l, col_btn, col_r = st.columns([2, 1, 2])
 with col_l: st.markdown(f"<h4 style='text-align: right; color: #a0a0a0;'>{ui['lang_left']}</h4>", unsafe_allow_html=True)
 with col_btn:
@@ -154,14 +174,12 @@ with col_r: st.markdown(f"<h4 style='text-align: left; color: #f55036;'>{ui['lan
 
 st.write("")
 
-# Nút Xóa Text (Đặt ngoài Form)
 col_spacer, col_clear = st.columns([5, 1])
 with col_clear:
     st.markdown('<div class="btn-clear">', unsafe_allow_html=True)
     st.button("🗑️ Xóa Text", on_click=clear_text, use_container_width=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
-# FORM NHẬP LIỆU 
 with st.form(key='translation_form', clear_on_submit=False):
     source_text = st.text_area(ui["label_input"], height=160, placeholder=ui["placeholder"], key="main_input", label_visibility="collapsed")
     
@@ -191,16 +209,15 @@ if submit_button:
                     stream=True
                 )
                 
+                # BƯỚC 1: Hiển thị bằng result-box mượt mà lúc đang Stream
                 for chunk in response:
                     content = chunk.choices[0].delta.content
                     if content:
                         full_response += content
                         result_placeholder.markdown(f'<div class="result-box">{full_response.replace(chr(10), "<br>")}</div>', unsafe_allow_html=True)
                 
-                # --- KHU VỰC COPY NHANH ---
-                st.markdown("<small style='color: #888;'>👇 Click vào biểu tượng 📋 ở góc phải ô dưới đây để COPY nhanh bản dịch:</small>", unsafe_allow_html=True)
-                st.code(full_response, language="text")
-                # --------------------------
+                # BƯỚC 2: Gõ xong, tráo thành khung st.code có nút Copy (CSS đã lo phần ngoại hình)
+                result_placeholder.code(full_response, language="text")
 
                 st.toast(ui["toast"], icon="✅")
             except Exception as e:
