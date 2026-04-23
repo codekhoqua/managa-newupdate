@@ -1,5 +1,6 @@
 import streamlit as st
 from openai import OpenAI
+from st_copy_to_clipboard import st_copy_to_clipboard
 
 # ================== 1. CẤU HÌNH TRANG & GIAO DIỆN ==================
 st.set_page_config(page_title="LSA Translator | Groq", page_icon="⚡", layout="centered")
@@ -31,7 +32,7 @@ st.markdown("""
     }
     .btn-clear > button:hover { background-color: #ff4b4b !important; color: white !important; }
 
-    /* Khung hiển thị lúc đang stream */
+    /* Khung hiển thị lúc đang stream (TRẢ VỀ NGUYÊN BẢN ĐẸP ĐẼ) */
     .result-box {
         background: rgba(30, 30, 30, 0.6); backdrop-filter: blur(10px); color: #f0f0f0;
         padding: 24px; border-radius: 12px; border-left: 4px solid #f55036;
@@ -40,30 +41,6 @@ st.markdown("""
     }
     .result-header { font-size: 18px; font-weight: bold; color: #f55036; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
     
-    /* DIỆT CỎ TẬN GỐC FONT MONOSPACE CỦA STREAMLIT CODE BLOCK */
-    [data-testid="stCodeBlock"] {
-        background-color: rgba(30, 30, 30, 0.6) !important;
-        backdrop-filter: blur(10px) !important;
-        border-radius: 12px !important;
-        border-left: 4px solid #f55036 !important;
-        border-top: 1px solid #333 !important;
-        border-right: 1px solid #333 !important;
-        border-bottom: 1px solid #333 !important;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
-        padding: 10px !important;
-        margin-top: 15px;
-    }
-    [data-testid="stCodeBlock"] pre {
-        background-color: transparent !important;
-    }
-    /* Dấu * nghĩa là ép toàn bộ thẻ con bên trong đều phải đổi font */
-    [data-testid="stCodeBlock"] * {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
-        font-size: 16.5px !important;
-        line-height: 1.8 !important;
-        color: #f0f0f0 !important;
-    }
-
     footer {visibility: hidden;}
     .stTextArea textarea { font-size: 15.5px !important; border-radius: 8px; }
     </style>
@@ -91,7 +68,7 @@ DICT_JP_VI = {
 }
 dict_prompt_str = "\n".join([f"   - {k} -> {v}" for k, v in DICT_JP_VI.items()])
 
-# ================== 4. QUẢN LÝ TRẠNG THÁI (SESSION STATE) ==================
+# ================== 4. QUẢN LÝ TRẠNG THÁI ==================
 if "is_jp_to_vi" not in st.session_state:
     st.session_state.is_jp_to_vi = False
 if "main_input" not in st.session_state:
@@ -107,7 +84,7 @@ UI_TEXT = {
         "placeholder": "Nhập nội dung cần dịch vào đây... (Ctrl + Enter để dịch)",
         "button": "⚡ Dịch Tốc Độ Cao", "toast": "Đã dịch xong trong chớp mắt!",
         "label_context": "Ngữ cảnh:", "label_input": "Văn bản nguồn:", "result_title": "BẢN DỊCH TIẾNG NHẬT",
-        "warning": "Vui lòng nhập nội dung cần dịch.", "footer": "© 2026 LinkStoryAsia | Design Team Internal Tool Ver 3.7",
+        "warning": "Vui lòng nhập nội dung cần dịch.", "footer": "© 2026 LinkStoryAsia | Design Team Internal Tool Ver 4.0",
         "lang_left": "Tiếng Việt 🇻🇳", "lang_right": "Tiếng Nhật 🇯🇵"
     },
     "jp_to_vi": {
@@ -115,7 +92,7 @@ UI_TEXT = {
         "placeholder": "翻訳する内容を入力してください... (Ctrl + Enter)",
         "button": "⚡ 超高速翻訳", "toast": "翻訳が完了しました！",
         "label_context": "文脈:", "label_input": "原文:", "result_title": "ベトナム語訳",
-        "warning": "内容を入力してください。", "footer": "© 2026 LinkStoryAsia | デザインチーム翻訳ツール Ver 3.7",
+        "warning": "内容を入力してください。", "footer": "© 2026 LinkStoryAsia | デザインチーム翻訳ツール Ver 4.0",
         "lang_left": "日本語 🇯🇵", "lang_right": "ベトナム語 🇻🇳"
     }
 }
@@ -136,10 +113,9 @@ Chỉ trả về bản dịch cuối cùng. Tuyệt đối KHÔNG giải thích,
 2. Từ lóng và ngữ cảnh: Chú ý các từ lóng văn phòng. Chú ý dịch chính xác tên riêng.
 3. Từ điển thuật ngữ BẮT BUỘC:
 {dict_prompt_str}
-4. Ghép cặp thuật ngữ: Giữ kèm từ gốc/tiếng Anh trong ngoặc. Ví dụ: 'Inpainting (インペイント)'.
-5. QUY TẮC DỰ PHÒNG (Fallback): Nếu gặp thuật ngữ lạ KHÔNG CÓ trong từ điển, GIỮ NGUYÊN TIẾNG ANH.
+4. Ghép cặp thuật ngữ: Giữ kèm từ gốc/tiếng Anh trong ngoặc.
+5. QUY TẮC DỰ PHÒNG: Nếu gặp thuật ngữ lạ KHÔNG CÓ trong từ điển, GIỮ NGUYÊN TIẾNG ANH.
 6. Văn phong: Tự nhiên, ngắn gọn."""
-
 else:
     sys_msg = f"""Bạn là một chuyên gia dịch thuật tiếng Việt sang tiếng Nhật, làm việc tại bộ phận Design, Manga, Webtoon.
 Đặc thù văn bản: Bao gồm thuật ngữ kỹ thuật (Photoshop) VÀ giao tiếp văn phòng, chỉ thị công việc hàng ngày.
@@ -174,6 +150,7 @@ with col_r: st.markdown(f"<h4 style='text-align: left; color: #f55036;'>{ui['lan
 
 st.write("")
 
+# Nút xóa text
 col_spacer, col_clear = st.columns([5, 1])
 with col_clear:
     st.markdown('<div class="btn-clear">', unsafe_allow_html=True)
@@ -209,17 +186,19 @@ if submit_button:
                     stream=True
                 )
                 
-                # BƯỚC 1: Hiển thị bằng result-box mượt mà lúc đang Stream
+                # Trả lại box hiển thị kết quả nguyên bản
                 for chunk in response:
                     content = chunk.choices[0].delta.content
                     if content:
                         full_response += content
                         result_placeholder.markdown(f'<div class="result-box">{full_response.replace(chr(10), "<br>")}</div>', unsafe_allow_html=True)
                 
-                # BƯỚC 2: Gõ xong, tráo thành khung st.code (Font chuẩn + Tự động rớt dòng)
-                result_placeholder.code(full_response, language="text", wrap_lines=True)
+                # Hiển thị nút Copy siêu xịn bên dưới
+                st.write("")
+                col_c1, col_c2 = st.columns([5, 1])
+                with col_c2:
+                    st_copy_to_clipboard(full_response, text="📋 Copy Text", toast_text="Đã copy thành công!")
 
-                st.toast(ui["toast"], icon="✅")
             except Exception as e:
                 st.error(f"Lỗi hệ thống: {str(e)}")
     else:
