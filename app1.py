@@ -84,7 +84,7 @@ UI_TEXT = {
         "placeholder": "Nhập nội dung cần dịch vào đây... (Ctrl + Enter để dịch)",
         "button": "⚡ Dịch Tốc Độ Cao", "toast": "Đã dịch xong trong chớp mắt!",
         "label_context": "Ngữ cảnh:", "label_input": "Văn bản nguồn:", "result_title": "BẢN DỊCH TIẾNG NHẬT",
-        "warning": "Vui lòng nhập nội dung cần dịch.", "footer": "© 2026 LinkStoryAsia | Design Team Internal Tool Ver 4.0",
+        "warning": "Vui lòng nhập nội dung cần dịch.", "footer": "© 2026 LinkStoryAsia | Design Team Internal Tool Ver 4.1",
         "lang_left": "Tiếng Việt 🇻🇳", "lang_right": "Tiếng Nhật 🇯🇵"
     },
     "jp_to_vi": {
@@ -92,7 +92,7 @@ UI_TEXT = {
         "placeholder": "翻訳する内容を入力してください... (Ctrl + Enter)",
         "button": "⚡ 超高速翻訳", "toast": "翻訳が完了しました！",
         "label_context": "文脈:", "label_input": "原文:", "result_title": "ベトナム語訳",
-        "warning": "内容を入力してください。", "footer": "© 2026 LinkStoryAsia | デザインチーム翻訳ツール Ver 4.0",
+        "warning": "内容を入力してください。", "footer": "© 2026 LinkStoryAsia | デザインチーム翻訳ツール Ver 4.1",
         "lang_left": "日本語 🇯🇵", "lang_right": "ベトナム語 🇻🇳"
     }
 }
@@ -197,7 +197,11 @@ if submit_button:
                 st.write("")
                 col_c1, col_c2 = st.columns([5, 1])
                 with col_c2:
-                    st_copy_to_clipboard(full_response, text="📋 Copy Text", toast_text="Đã copy thành công!")
+                    st_copy_to_clipboard(
+                        full_response, 
+                        before_copy_label="📋 Copy Text", 
+                        after_copy_label="✅ Đã copy!"
+                    )
 
             except Exception as e:
                 st.error(f"Lỗi hệ thống: {str(e)}")
