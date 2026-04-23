@@ -138,7 +138,7 @@ UI_TEXT = {
         "warning": "内容を入力してください。", "footer": "© 2026 LinkStoryAsia | デザインチーム翻訳ツール Ver 5.0",
         "lang_left": "日本語 🇯🇵", "lang_right": "ベトナム語 🇻🇳",
         "btn_clear": "🗑️", "contexts": ["ビジネス", "丁寧語", "カジュアル"],
-        "processing": "翻訳中...", "btn_copy": "📋"
+        "processing": "翻訳中...", "btn_copy": ""
     }
 }
 
