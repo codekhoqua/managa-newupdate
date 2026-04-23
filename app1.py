@@ -181,6 +181,11 @@ Chỉ trả về bản dịch cuối cùng. Tuyệt đối KHÔNG giải thích,
    - Folder / Group -> フォルダ / グループ
    - Inpainting -> インペイント
    - Script -> スクリプト
+   - 描き文字 (Kakimoji) -> Chữ hiệu ứng âm thanh (SFX) / Chữ vẽ tay
+   - 白抜き (Shironuki) -> Làm viền trắng / Chữ trắng nền đen / Đục lủng nền
+   - ベタ塗り (Betanuri) -> Tô đen hoàn toàn / Solid fill
+   - トーン削り (Toon kezuri) -> Cạo tone / Xóa mờ tone (Screentone)
+   - 断ち切り (Tachikiri) -> Tràn lề / Bleed (vùng ảnh bị cắt khi in)
 4. Ghép cặp thuật ngữ: Định dạng 'Tiếng Nhật (Tiếng Anh)'.
 5. Văn phong: Chuyên nghiệp, chuẩn xác."""
 
