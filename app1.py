@@ -81,24 +81,24 @@ def clear_text():
 # Đã update đầy đủ các trường để dịch toàn bộ giao diện
 UI_TEXT = {
     "vi_to_jp": {
-        "title": "LSA - Design Team Internal",
+        "title": "LSA TRANSLATOR", "subtitle": "Powered by Groq Engine ⚡",
         "placeholder": "Nhập nội dung cần dịch vào đây... (Ctrl + Enter để dịch)",
         "button": "⚡ Dịch Tốc Độ Cao", "toast": "Đã dịch xong trong chớp mắt!",
         "label_context": "Ngữ cảnh:", "label_input": "Văn bản nguồn:", "result_title": "BẢN DỊCH TIẾNG NHẬT",
         "warning": "Vui lòng nhập nội dung cần dịch.", "footer": "© 2026 LinkStoryAsia | Design Team Internal Tool Ver 4.6",
         "lang_left": "Tiếng Việt 🇻🇳", "lang_right": "Tiếng Nhật 🇯🇵",
         "btn_clear": "🗑️", "contexts": ["Văn phòng", "Kính ngữ", "Thân mật"],
-        "processing": "Processing...", "btn_copy": "📋", "btn_copy_done": "✅!"
+        "processing": "Processing...", "btn_copy": "📋", "btn_copy_done": "✅"
     },
     "jp_to_vi": {
-        "title": "LSA - デザインチーム内部翻訳",
+        "title": "LSA TRANSLATOR", "subtitle": "Powered by Groq Engine ⚡",
         "placeholder": "翻訳する内容を入力してください... (Ctrl + Enter)",
         "button": "⚡ 超高速翻訳", "toast": "翻訳が完了しました！",
         "label_context": "文脈:", "label_input": "原文:", "result_title": "ベトナム語訳",
         "warning": "内容を入力してください。", "footer": "© 2026 LinkStoryAsia | デザインチーム翻訳ツール Ver 4.6",
         "lang_left": "日本語 🇯🇵", "lang_right": "ベトナム語 🇻🇳",
         "btn_clear": "🗑️", "contexts": ["ビジネス", "丁寧語", "カジュアル"],
-        "processing": "翻訳中...", "btn_copy": "📋", "btn_copy_done": "✅！"
+        "processing": "翻訳中...", "btn_copy": "📋", "btn_copy_done": "✅"
     }
 }
 
