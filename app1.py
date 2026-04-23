@@ -177,7 +177,7 @@ st.write("")
 col_spacer, col_clear = st.columns([5, 1])
 with col_clear:
     st.markdown('<div class="btn-clear">', unsafe_allow_html=True)
-    st.button("🗑️ Xóa Text", on_click=clear_text, use_container_width=True)
+    st.button("🗑️", on_click=clear_text, use_container_width=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
 with st.form(key='translation_form', clear_on_submit=False):
