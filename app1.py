@@ -105,7 +105,9 @@ DICT_JP_VI = {
     "削除補完": "Inpainting",
     "スクリプト": "Script",
     "パツンパツン": "Quá tải / Bận kẹt lịch",
-    "パツパツ": "Quá tải / Bận kẹt lịch"
+    "パツパツ": "Quá tải / Bận kẹt lịch",
+    "単行本": "Truyện dài / Tankoubon",
+    "読切": "Truyện ngắn / Yomikiri"
 }
 dict_prompt_str = "\n".join([f"- {k} -> {v}" for k, v in DICT_JP_VI.items()])
 
@@ -166,6 +168,8 @@ Your task is to translate work instructions from Japanese clients into accurate,
 - ベタ / ベタ塗り (Beta / Betanuri) -> Mảng đen / Tô đen (Solid fill)
 - トーン削り (Toon kezuri) -> Cạo tone / Xóa mờ tone
 - 断ち切り (Tachikiri) -> Tràn lề (Bleed)
+- 単行本 (Tankoubon) -> Truyện dài / Tankoubon
+- 読切 (Yomikiri) -> Truyện ngắn / Yomikiri
 
 # Photoshop & Technical Terms:
 - レイヤーセット / フォルダ (Reiyaa setto / Foruda) -> Folder / Group
