@@ -209,6 +209,8 @@ Chỉ trả về bản dịch cuối cùng. Tuyệt đối KHÔNG giải thích,
    - Tô đen / Solid fill -> ベタ塗り
    - Cạo tone -> トーン削り
    - Tràn lề -> 断ち切り
+   - Truyện dài / tankoubon -> 単行本
+   - Truyện ngắn / yomikiri -> 読切
 4. Ghép cặp thuật ngữ: Định dạng 'Tiếng Nhật (Tiếng Anh)'.
 5. Văn phong: Chuyên nghiệp, chuẩn xác."""
 
